@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - Instant Help System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        :root {
+            --primary: #e74c3c;
+            --secondary: #3498db;
+            --accent: #f39c12;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --info: #3498db;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            background: linear-gradient(135deg, var(--secondary) 0%, #2980b9 100%);
+            color: white;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .tagline {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .user-details h2 {
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+
+        .user-stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--secondary);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .dashboard-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .card h2 {
+            color: var(--dark);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light);
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .emergency-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .emergency-item {
+            background: var(--light);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 5px solid var(--warning);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .emergency-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .emergency-item.resolved {
+            border-left-color: var(--success);
+        }
+
+        .emergency-item.in-progress {
+            border-left-color: var(--info);
+        }
+
+        .emergency-item.critical {
+            border-left-color: var(--danger);
+        }
+
+        .emergency-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .emergency-id {
+            font-weight: bold;
+            color: var(--dark);
+        }
+
+        .emergency-type {
+            padding: 5px 10px;
+            border-radius: 20px;
+            background: var(--secondary);
+            color: white;
+            font-size: 0.8rem;
+        }
+
+        .emergency-details {
+            margin-bottom: 15px;
+        }
+
+        .emergency-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .emergency-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        .btn-accent {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-accent:hover {
+            background: #e67e22;
+            transform: translateY(-2px);
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-in-progress { background: #cce7ff; color: #004085; }
+        .status-resolved { background: #d4edda; color: #155724; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+
+        .severity-badge {
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .severity-critical { background: #f8d7da; color: #721c24; }
+        .severity-high { background: #ffeaa7; color: #856404; }
+        .severity-medium { background: #d1ecf1; color: #0c5460; }
+        .severity-low { background: #d4edda; color: #155724; }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 15px;
+            background: var(--light);
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            background: #dde4e8;
+        }
+
+        .filter-btn.active {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .emergency-detail-view {
+            display: none;
+        }
+
+        .emergency-detail-view.active {
+            display: block;
+        }
+
+        .detail-section {
+            margin-bottom: 20px;
+        }
+
+        .detail-section h3 {
+            margin-bottom: 10px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .timeline {
+            margin-top: 20px;
+        }
+
+        .timeline-item {
+            padding: 10px;
+            border-left: 3px solid var(--secondary);
+            margin-bottom: 10px;
+            background: #f8f9fa;
+        }
+
+        .timeline-time {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        #detailMap {
+            height: 300px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .no-emergencies {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .no-emergencies i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #ddd;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+            color: var(--dark);
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        .back-btn {
+            margin-bottom: 20px;
+        }
+
+        .response-time {
+            font-weight: bold;
+            color: var(--secondary);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <h1>User Dashboard</h1>
+            <p class="tagline">Track Your Emergency Complaints & Status</p>
+        </header>
+
+        <div class="user-info">
+            <div class="user-details">
+                <h2 id="userName">Loading...</h2>
+                <p id="userMobile">Mobile: Loading...</p>
+            </div>
+            <div class="user-stats">
+                <div class="stat">
+                    <div class="stat-value" id="totalEmergencies">0</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="pendingEmergencies">0</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="resolvedEmergencies">0</div>
+                    <div class="stat-label">Resolved</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <button class="filter-btn active" onclick="filterEmergencies('all')">All</button>
+            <button class="filter-btn" onclick="filterEmergencies('pending')">Pending</button>
+            <button class="filter-btn" onclick="filterEmergencies('in_progress')">In Progress</button>
+            <button class="filter-btn" onclick="filterEmergencies('resolved')">Resolved</button>
+            <button class="filter-btn" onclick="filterEmergencies('critical')">Critical</button>
+        </div>
+
+        <div class="dashboard-content">
+            <div class="card">
+                <h2><i class="fas fa-list"></i> Your Emergency Complaints</h2>
+                <div class="emergency-list" id="emergencyList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <span style="margin-left: 10px;">Loading your emergencies...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div id="emergencyListView">
+                    <h2><i class="fas fa-info-circle"></i> Emergency Details</h2>
+                    <div class="no-emergencies" id="noEmergencySelected">
+                        <i class="fas fa-info-circle"></i>
+                        <p>Select an emergency from the list to view details</p>
+                    </div>
+                </div>
+
+                <div class="emergency-detail-view" id="emergencyDetailView">
+                    <button class="btn btn-secondary back-btn" onclick="showEmergencyList()">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </button>
+                    <h2 id="detailEmergencyId">Emergency Details</h2>
+                    
+                    <div class="detail-section">
+                        <h3><i class="fas fa-user"></i> User Information</h3>
+                        <p><strong>Name:</strong> <span id="detailUserName"></span></p>
+                        <p><strong>Mobile:</strong> <span id="detailUserMobile"></span></p>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3><i class="fas fa-exclamation-triangle"></i> Emergency Details</h3>
+                        <p><strong>Type:</strong> <span id="detailEmergencyType"></span></p>
+                        <p><strong>Description:</strong> <span id="detailDescription"></span></p>
+                        <p><strong>Severity:</strong> <span id="detailSeverity"></span></p>
+                        <p><strong>Status:</strong> <span id="detailStatus"></span></p>
+                        <p><strong>Department:</strong> <span id="detailDepartment"></span></p>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3><i class="fas fa-map-marker-alt"></i> Location</h3>
+                        <p id="detailAddress">Loading address...</p>
+                        <div id="detailMap"></div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3><i class="fas fa-history"></i> Timeline</h3>
+                        <div class="timeline" id="detailTimeline">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                                <span style="margin-left: 10px;">Loading timeline...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="shareEmergencyDetails()">
+                            <i class="fas fa-share"></i> Share Details
+                        </button>
+                        <button class="btn btn-accent" onclick="requestUpdate()">
+                            <i class="fas fa-sync"></i> Request Update
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Instant Help System &copy; 2023 | User Dashboard</p>
+            <p>Track your emergency complaints and stay updated on response progress</p>
+        </footer>
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        // Application state
+        const DASHBOARD_STATE = {
+            userInfo: {
+                name: '',
+                mobile: ''
+            },
+            emergencies: [],
+            currentFilter: 'all',
+            selectedEmergency: null,
+            detailMap: null
+        };
+
+        // Initialize the dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserInfo();
+            loadEmergencies();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Refresh data every 30 seconds
+            setInterval(() => {
+                loadEmergencies();
+            }, 30000);
+        }
+
+        function loadUserInfo() {
+            // Get user info from localStorage (set during emergency submission)
+            const userName = localStorage.getItem('emergencyUserName') || 'User';
+            const userMobile = localStorage.getItem('emergencyUserMobile') || 'Not provided';
+            
+            DASHBOARD_STATE.userInfo = { name: userName, mobile: userMobile };
+            
+            document.getElementById('userName').textContent = userName;
+            document.getElementById('userMobile').textContent = `Mobile: ${userMobile}`;
+        }
+
+        async function loadEmergencies() {
+            try {
+                const userMobile = DASHBOARD_STATE.userInfo.mobile;
+                if (!userMobile || userMobile === 'Not provided') {
+                    showNoEmergenciesMessage('Please submit an emergency first to view your dashboard');
+                    return;
+                }
+
+                const response = await fetch(`/api/user/emergencies/${userMobile}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    DASHBOARD_STATE.emergencies = result.data;
+                    displayEmergencies();
+                    updateStats();
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error('Error loading emergencies:', error);
+                showNoEmergenciesMessage('Failed to load your emergencies. Please try again later.');
+            }
+        }
+
+        function displayEmergencies() {
+            const emergencyList = document.getElementById('emergencyList');
+            
+            if (DASHBOARD_STATE.emergencies.length === 0) {
+                showNoEmergenciesMessage('You haven\'t submitted any emergencies yet.');
+                return;
+            }
+
+            const filteredEmergencies = DASHBOARD_STATE.emergencies.filter(emergency => {
+                if (DASHBOARD_STATE.currentFilter === 'all') return true;
+                if (DASHBOARD_STATE.currentFilter === 'critical') return emergency.severity === 'critical';
+                return emergency.status === DASHBOARD_STATE.currentFilter;
+            });
+
+            if (filteredEmergencies.length === 0) {
+                emergencyList.innerHTML = `
+                    <div class="no-emergencies">
+                        <i class="fas fa-filter"></i>
+                        <p>No emergencies match the selected filter</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let emergenciesHTML = '';
+            
+            filteredEmergencies.forEach(emergency => {
+                const statusClass = `status-${emergency.status.replace('_', '-')}`;
+                const severityClass = `severity-${emergency.severity}`;
+                const itemClass = `emergency-item ${emergency.status} ${emergency.severity === 'critical' ? 'critical' : ''}`;
+                
+                // Calculate response time if resolved
+                let responseTimeHTML = '';
+                if (emergency.status === 'resolved' && emergency.response_time) {
+                    responseTimeHTML = `<p class="response-time">Response Time: ${formatResponseTime(emergency.response_time)}</p>`;
+                }
+
+                emergenciesHTML += `
+                    <div class="${itemClass}" onclick="showEmergencyDetails('${emergency.emergency_id}')">
+                        <div class="emergency-header">
+                            <div class="emergency-id">${emergency.emergency_id}</div>
+                            <div class="emergency-type">${emergency.emergency_type.toUpperCase()}</div>
+                        </div>
+                        <div class="emergency-details">
+                            <p>${emergency.description}</p>
+                        </div>
+                        <div class="emergency-meta">
+                            <span class="status-badge ${statusClass}">${emergency.status.replace('_', ' ').toUpperCase()}</span>
+                            <span class="severity-badge ${severityClass}">${emergency.severity.toUpperCase()}</span>
+                        </div>
+                        ${responseTimeHTML}
+                        <p><small>${new Date(emergency.created_at).toLocaleString()}</small></p>
+                    </div>
+                `;
+            });
+
+            emergencyList.innerHTML = emergenciesHTML;
+        }
+
+        function showNoEmergenciesMessage(message) {
+            document.getElementById('emergencyList').innerHTML = `
+                <div class="no-emergencies">
+                    <i class="fas fa-inbox"></i>
+                    <p>${message}</p>
+                    <button class="btn btn-primary" onclick="window.location.href='instant_help.html'" style="margin-top: 15px;">
+                        <i class="fas fa-plus"></i> Report New Emergency
+                    </button>
+                </div>
+            `;
+        }
+
+        function updateStats() {
+            const total = DASHBOARD_STATE.emergencies.length;
+            const pending = DASHBOARD_STATE.emergencies.filter(e => e.status === 'pending').length;
+            const resolved = DASHBOARD_STATE.emergencies.filter(e => e.status === 'resolved').length;
+            
+            document.getElementById('totalEmergencies').textContent = total;
+            document.getElementById('pendingEmergencies').textContent = pending;
+            document.getElementById('resolvedEmergencies').textContent = resolved;
+        }
+
+        function filterEmergencies(filter) {
+            DASHBOARD_STATE.currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            displayEmergencies();
+        }
+
+        async function showEmergencyDetails(emergencyId) {
+            const emergency = DASHBOARD_STATE.emergencies.find(e => e.emergency_id === emergencyId);
+            if (!emergency) return;
+            
+            DASHBOARD_STATE.selectedEmergency = emergency;
+            
+            // Show detail view and hide list view
+            document.getElementById('emergencyListView').style.display = 'none';
+            document.getElementById('emergencyDetailView').classList.add('active');
+            
+            // Populate emergency details
+            document.getElementById('detailEmergencyId').textContent = emergency.emergency_id;
+            document.getElementById('detailUserName').textContent = emergency.user_name;
+            document.getElementById('detailUserMobile').textContent = emergency.mobile_number;
+            document.getElementById('detailEmergencyType').textContent = emergency.emergency_type;
+            document.getElementById('detailDescription').textContent = emergency.description;
+            document.getElementById('detailSeverity').innerHTML = `<span class="severity-badge severity-${emergency.severity}">${emergency.severity.toUpperCase()}</span>`;
+            document.getElementById('detailStatus').innerHTML = `<span class="status-badge status-${emergency.status.replace('_', '-')}">${emergency.status.replace('_', ' ').toUpperCase()}</span>`;
+            document.getElementById('detailDepartment').textContent = emergency.department || 'Not assigned';
+            document.getElementById('detailAddress').textContent = emergency.address || 'Address not available';
+            
+            // Initialize map
+            initializeDetailMap(emergency.location);
+            
+            // Load timeline
+            await loadEmergencyTimeline(emergencyId);
+        }
+
+        function showEmergencyList() {
+            document.getElementById('emergencyListView').style.display = 'block';
+            document.getElementById('emergencyDetailView').classList.remove('active');
+            DASHBOARD_STATE.selectedEmergency = null;
+        }
+
+        function initializeDetailMap(location) {
+            const mapContainer = document.getElementById('detailMap');
+            mapContainer.innerHTML = ''; // Clear previous map
+            
+            if (!location || !location.latitude || !location.longitude) {
+                mapContainer.innerHTML = '<p>Location data not available</p>';
+                return;
+            }
+            
+            DASHBOARD_STATE.detailMap = L.map('detailMap').setView([location.latitude, location.longitude], 15);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(DASHBOARD_STATE.detailMap);
+            
+            // Add marker for emergency location
+            L.marker([location.latitude, location.longitude])
+                .addTo(DASHBOARD_STATE.detailMap)
+                .bindPopup('Emergency Location')
+                .openPopup();
+        }
+
+        async function loadEmergencyTimeline(emergencyId) {
+            try {
+                const response = await fetch(`/api/emergency/${emergencyId}/logs`);
+                const result = await response.json();
+                
+                const timelineElement = document.getElementById('detailTimeline');
+                
+                if (result.success && result.data.length > 0) {
+                    let timelineHTML = '';
+                    
+                    result.data.forEach(log => {
+                        timelineHTML += `
+                            <div class="timeline-item">
+                                <strong>${log.action.replace('_', ' ').toUpperCase()}</strong>
+                                <p>${log.notes || 'No additional notes'}</p>
+                                <div class="timeline-time">${new Date(log.created_at).toLocaleString()}</div>
+                            </div>
+                        `;
+                    });
+                    
+                    timelineElement.innerHTML = timelineHTML;
+                } else {
+                    timelineElement.innerHTML = '<p>No timeline data available</p>';
+                }
+            } catch (error) {
+                console.error('Error loading timeline:', error);
+                document.getElementById('detailTimeline').innerHTML = '<p>Failed to load timeline</p>';
+            }
+        }
+
+        function formatResponseTime(minutes) {
+            if (minutes < 60) {
+                return `${minutes} minutes`;
+            } else {
+                const hours = Math.floor(minutes / 60);
+                const remainingMinutes = minutes % 60;
+                return `${hours}h ${remainingMinutes}m`;
+            }
+        }
+
+        function shareEmergencyDetails() {
+            if (!DASHBOARD_STATE.selectedEmergency) return;
+            
+            const emergency = DASHBOARD_STATE.selectedEmergency;
+            const text = `Emergency Details:
+ID: ${emergency.emergency_id}
+Type: ${emergency.emergency_type}
+Status: ${emergency.status}
+Description: ${emergency.description}
+Location: ${emergency.address || 'Not available'}`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Emergency Details',
+                    text: text
+                });
+            } else {
+                navigator.clipboard.writeText(text)
+                    .then(() => {
+                        alert("Emergency details copied to clipboard");
+                    })
+                    .catch(() => {
+                        alert("Could not copy emergency details");
+                    });
+            }
+        }
+
+        function requestUpdate() {
+            if (!DASHBOARD_STATE.selectedEmergency) return;
+            
+            alert(`Update request sent for emergency ${DASHBOARD_STATE.selectedEmergency.emergency_id}. Our team will contact you shortly.`);
+            // In a real implementation, this would send a notification to the admin
+        }
+    </script>
+</body>
+</html>

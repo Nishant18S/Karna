@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kisan Sathi - Agricultural AI Assistant</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 25%, #4CAF50 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .main-container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      width: 100%;
+      max-width: 500px;
+      min-height: 600px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #2e7d32, #4CAF50);
+      padding: 20px;
+      text-align: center;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: shimmer 3s infinite;
+    }
+
+    .header-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .logo {
+      font-size: 2.2rem;
+      margin-bottom: 8px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .tagline {
+      font-size: 0.9rem;
+      opacity: 0.9;
+      font-weight: 300;
+    }
+
+    .status-bar {
+      background: rgba(76, 175, 80, 0.1);
+      padding: 8px 20px;
+      border-bottom: 1px solid rgba(76, 175, 80, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: #2e7d32;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: #4CAF50;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #fafafa;
+    }
+
+    .chat-box {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      max-height: 400px;
+      min-height: 350px;
+    }
+
+    .message {
+      margin: 12px 0;
+      padding: 12px 16px;
+      border-radius: 18px;
+      max-width: 85%;
+      animation: messageSlide 0.3s ease-out;
+      position: relative;
+      word-wrap: break-word;
+    }
+
+    .user-message {
+      background: linear-gradient(135deg, #1976d2, #42a5f5);
+      color: white;
+      margin-left: auto;
+      border-bottom-right-radius: 6px;
+      box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+    }
+
+    .bot-message {
+      background: white;
+      color: #333;
+      border: 1px solid #e0e0e0;
+      border-left: 4px solid #4CAF50;
+      border-bottom-left-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .bot-message::before {
+      content: '🌾';
+      position: absolute;
+      top: -8px;
+      left: 12px;
+      background: white;
+      padding: 2px 6px;
+      border-radius: 50%;
+      font-size: 0.8rem;
+    }
+
+    .typing-indicator {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-left: 4px solid #4CAF50;
+      padding: 16px;
+      margin: 12px 0;
+      border-radius: 18px;
+      border-bottom-left-radius: 6px;
+      max-width: 85%;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .typing-dots {
+      display: flex;
+      gap: 4px;
+    }
+
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      background: #4CAF50;
+      border-radius: 50%;
+      animation: typing 1.4s infinite ease-in-out;
+    }
+
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    .welcome-message {
+      text-align: center;
+      padding: 30px 20px;
+      color: #666;
+    }
+
+    .welcome-icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+    }
+
+    .quick-suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 15px;
+    }
+
+    .suggestion-btn {
+      background: rgba(76, 175, 80, 0.1);
+      border: 1px solid rgba(76, 175, 80, 0.3);
+      color: #2e7d32;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .suggestion-btn:hover {
+      background: #4CAF50;
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .input-container {
+      background: white;
+      padding: 20px;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .input-area {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      background: #f5f5f5;
+      border-radius: 25px;
+      padding: 8px;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .input-area:focus-within {
+      border-color: #4CAF50;
+      background: white;
+      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+    }
+
+    #user-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      padding: 12px 16px;
+      font-size: 1rem;
+      background: transparent;
+      color: #333;
+    }
+
+    #user-input::placeholder {
+      color: #999;
+    }
+
+    .send-btn {
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    }
+
+    .send-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+    }
+
+    .send-btn:active {
+      transform: translateY(0);
+    }
+
+    .send-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .voice-btn {
+      background: linear-gradient(135deg, #ff9800, #f57c00);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 50%;
+      cursor: pointer;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      margin-right: 8px;
+    }
+
+    .voice-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .voice-btn.recording {
+      background: linear-gradient(135deg, #f44336, #d32f2f);
+      animation: pulse 1s infinite;
+    }
+
+    .error-message {
+      background: #ffebee;
+      border-left: 4px solid #f44336;
+      color: #c62828;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .feature-card {
+      background: rgba(76, 175, 80, 0.05);
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+      border: 1px solid rgba(76, 175, 80, 0.1);
+    }
+
+    .feature-icon {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+    }
+
+    .feature-title {
+      font-weight: 600;
+      color: #2e7d32;
+      margin-bottom: 4px;
+    }
+
+    .feature-desc {
+      font-size: 0.8rem;
+      color: #666;
+    }
+
+    /* Animations */
+    @keyframes shimmer {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(0.95); }
+    }
+
+    @keyframes messageSlide {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes typing {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-10px); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 480px) {
+      .main-container {
+        margin: 10px;
+        min-height: 90vh;
+      }
+      
+      .message {
+        max-width: 95%;
+      }
+      
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Scrollbar Styling */
+    .chat-box::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .chat-box::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+
+    .chat-box::-webkit-scrollbar-thumb {
+      background: #4CAF50;
+      border-radius: 10px;
+    }
+
+    .chat-box::-webkit-scrollbar-thumb:hover {
+      background: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-content">
+        <div class="logo">🌾 Kisan Sathi</div>
+        <div class="tagline">Your Professional Agricultural AI Assistant</div>
+      </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <div class="status-dot"></div>
+      <span>AI Assistant Active • Ready to Help</span>
+    </div>
+
+    <!-- Chat Container -->
+    <div class="chat-container">
+      <div id="chat-box" class="chat-box">
+        <!-- Welcome Message -->
+        <div class="welcome-message">
+          <div class="welcome-icon">🌱</div>
+          <h3>Welcome to Kisan Sathi!</h3>
+          <p>Your intelligent farming companion. Ask me anything about agriculture, crops, pest control, weather, or farming techniques.</p>
+          
+          <div class="features-grid">
+            <div class="feature-card">
+              <div class="feature-icon">🌾</div>
+              <div class="feature-title">Crop Advice</div>
+              <div class="feature-desc">Planting & harvesting guidance</div>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">🐛</div>
+              <div class="feature-title">Pest Control</div>
+              <div class="feature-desc">Disease & pest management</div>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">🌤️</div>
+              <div class="feature-title">Weather Info</div>
+              <div class="feature-desc">Climate-based farming tips</div>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">💰</div>
+              <div class="feature-title">Market Rates</div>
+              <div class="feature-desc">Price trends & market info</div>
+            </div>
+          </div>
+
+          <div class="quick-suggestions">
+            <button class="suggestion-btn" onclick="sendSuggestion('What crops should I plant this season?')">🌱 Seasonal Crops</button>
+            <button class="suggestion-btn" onclick="sendSuggestion('How to control pests naturally?')">🐛 Pest Control</button>
+            <button class="suggestion-btn" onclick="sendSuggestion('Best time for irrigation?')">💧 Irrigation</button>
+            <button class="suggestion-btn" onclick="sendSuggestion('Soil testing importance')">🌍 Soil Health</button>
+            <button class="suggestion-btn" onclick="sendSuggestion('Organic farming benefits')">🌿 Organic Farming</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Area -->
+      <div class="input-container">
+        <div class="input-area">
+          <button class="voice-btn" id="voice-btn" onclick="toggleVoice()">🎤</button>
+          <input type="text" id="user-input" placeholder="Ask your farming question here..." onkeypress="handleKeyPress(event)" />
+          <button class="send-btn" id="send-btn" onclick="sendMessage()">Send ✨</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Configuration
+    const API_KEY = ''; // Add your Gemini API key here
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+    
+    // Global variables
+    const chatBox = document.getElementById("chat-box");
+    const userInput = document.getElementById("user-input");
+    const sendBtn = document.getElementById("send-btn");
+    const voiceBtn = document.getElementById("voice-btn");
+    let isRecording = false;
+    let recognition = null;
+
+    // Initialize speech recognition
+    function initSpeechRecognition() {
+      if ('webkitSpeechRecognition' in window) {
+        recognition = new webkitSpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+
+        recognition.onstart = function() {
+          isRecording = true;
+          voiceBtn.classList.add('recording');
+          voiceBtn.innerHTML = '🔴';
+        };
+
+        recognition.onend = function() {
+          isRecording = false;
+          voiceBtn.classList.remove('recording');
+          voiceBtn.innerHTML = '🎤';
+        };
+
+        recognition.onresult = function(event) {
+          const transcript = event.results[0][0].transcript;
+          userInput.value = transcript;
+          sendMessage();
+        };
+
+        recognition.onerror = function(event) {
+          console.error('Speech recognition error:', event.error);
+          isRecording = false;
+          voiceBtn.classList.remove('recording');
+          voiceBtn.innerHTML = '🎤';
+        };
+      }
+    }
+
+    // Toggle voice recognition
+    function toggleVoice() {
+      if (!recognition) {
+        alert('Speech recognition not supported in your browser');
+        return;
+      }
+
+      if (isRecording) {
+        recognition.stop();
+      } else {
+        recognition.start();
+      }
+    }
+
+    // Handle keyboard input
+    function handleKeyPress(event) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+      }
+    }
+
+    // Send suggestion
+    function sendSuggestion(message) {
+      userInput.value = message;
+      sendMessage();
+    }
+
+    // Main send message function
+    async function sendMessage() {
+      const message = userInput.value.trim();
+      if (!message) return;
+
+      // Clear welcome message if present
+      const welcomeMessage = chatBox.querySelector('.welcome-message');
+      if (welcomeMessage) {
+        welcomeMessage.remove();
+      }
+
+      // Disable input and button
+      userInput.disabled = true;
+      sendBtn.disabled = true;
+      sendBtn.innerHTML = 'Sending...';
+
+      // Display user message
+      displayMessage(message, "user-message");
+      userInput.value = "";
+
+      // Show typing indicator
+      showTypingIndicator();
+
+      try {
+        if (!API_KEY) {
+          throw new Error('Please add your Gemini API key to use the chatbot');
+        }
+
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: `You are "Kisan Sathi", a professional agricultural AI assistant specifically designed to help farmers and agricultural professionals. 
+
+GUIDELINES:
+1. Always be helpful, accurate, and professional
+2. Provide practical, actionable farming advice
+3. Keep responses concise but informative (max 3-4 sentences)
+4. Use simple language that farmers can understand
+5. Include specific steps or recommendations when possible
+6. If unsure, recommend consulting local agricultural experts
+7. Focus only on agriculture-related topics
+8. Mention seasonal considerations when relevant
+
+EXPERTISE AREAS:
+- Crop cultivation and management
+- Pest and disease control
+- Soil health and fertilization
+- Irrigation and water management
+- Weather and climate considerations
+- Organic and sustainable farming
+- Market trends and crop economics
+- Agricultural technology and equipment
+
+USER QUESTION: ${message}
+
+Provide a helpful, professional response as Kisan Sathi:`
+                  }
+                ]
+              }
+            ],
+            generationConfig: {
+              temperature: 0.7,
+              topK: 40,
+              topP: 0.95,
+              maxOutputTokens: 300,
+            }
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`API Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const botReply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "I apologize, but I couldn't process your request. Please try again.";
+
+        // Hide typing indicator and show response
+        hideTypingIndicator();
+        displayMessage(botReply, "bot-message");
+
+      } catch (error) {
+        hideTypingIndicator();
+        let errorMsg = "I'm having trouble connecting right now. Please check your internet connection and try again.";
+        
+        if (error.message.includes('API key')) {
+          errorMsg = "Please configure the API key to use Kisan Sathi. Contact your administrator for setup.";
+        }
+        
+        displayMessage(errorMsg, "bot-message error-message");
+        console.error('Error:', error);
+      } finally {
+        // Re-enable input and button
+        userInput.disabled = false;
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = 'Send ✨';
+        userInput.focus();
+      }
+    }
+
+    // Display message in chat
+    function displayMessage(message, className) {
+      const div = document.createElement("div");
+      div.classList.add("message");
+      div.classList.add(...className.split(' '));
+      div.textContent = message;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Show typing indicator
+    function showTypingIndicator() {
+      const typingDiv = document.createElement("div");
+      typingDiv.classList.add("typing-indicator");
+      typingDiv.id = "typing-indicator";
+      typingDiv.innerHTML = `
+        <span>🌾 Kisan Sathi is thinking...</span>
+        <div class="typing-dots">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+      `;
+      chatBox.appendChild(typingDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Hide typing indicator
+    function hideTypingIndicator() {
+      const typingIndicator = document.getElementById("typing-indicator");
+      if (typingIndicator) {
+        typingIndicator.remove();
+      }
+    }
+
+    // Initialize the application
+    document.addEventListener('DOMContentLoaded', function() {
+      initSpeechRecognition();
+      userInput.focus();
+      
+      // Add some initial animation
+      setTimeout(() => {
+        document.querySelector('.main-container').style.transform = 'scale(1)';
+        document.querySelector('.main-container').style.opacity = '1';
+      }, 100);
+    });
+
+    // Add initial styles for animation
+    document.querySelector('.main-container').style.transform = 'scale(0.9)';
+    document.querySelector('.main-container').style.opacity = '0';
+    document.querySelector('.main-container').style.transition = 'all 0.3s ease';
+  </script>
+</body>
+</html>

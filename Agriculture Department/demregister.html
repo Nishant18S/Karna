@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Registration - Agricultural Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #2E8B57, #228B22);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            color: #2E8B57;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .required {
+            color: #e74c3c;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="password"],
+        input[type="date"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background-color: #fafafa;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #2E8B57;
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-display {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            background-color: #fafafa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-display:hover {
+            border-color: #2E8B57;
+            background-color: #f0f8f0;
+        }
+
+        .file-input-display.has-file {
+            border-style: solid;
+            border-color: #2E8B57;
+            background-color: #e8f5e8;
+        }
+
+        .file-icon {
+            margin-right: 10px;
+            font-size: 20px;
+            color: #2E8B57;
+        }
+
+        .file-text {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .file-text.has-file {
+            color: #2E8B57;
+            font-weight: 600;
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, #2E8B57, #228B22);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(46, 139, 87, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #2E8B57;
+            margin-top: 10px;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .login-link a {
+            color: #2E8B57;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+
+            .form-container {
+                padding: 20px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌾 Farmer Registration</h1>
+            <p>Join our agricultural community platform</p>
+        </div>
+
+        <div class="form-container">
+            <div id="alertContainer"></div>
+
+            <form id="registrationForm" enctype="multipart/form-data">
+                <!-- Personal Information Section -->
+                <div class="form-section">
+                    <h3 class="section-title">👤 Personal Information</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="name">Full Name <span class="required">*</span></label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="dob">Date of Birth <span class="required">*</span></label>
+                            <input type="date" id="dob" name="dob" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="aadhaar">Aadhaar Number <span class="required">*</span></label>
+                            <input type="text" id="aadhaar" name="aadhaar" placeholder="Enter 12-digit Aadhaar number" maxlength="14" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password <span class="required">*</span></label>
+                            <input type="password" id="password" name="password" placeholder="Minimum 6 characters" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information Section -->
+                <div class="form-section">
+                    <h3 class="section-title">📞 Contact Information</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="mobile">Mobile Number <span class="required">*</span></label>
+                            <input type="tel" id="mobile" name="mobile" placeholder="10-digit mobile number" maxlength="10" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email Address <span class="required">*</span></label>
+                            <input type="email" id="email" name="email" placeholder="your.email@example.com" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Address Information Section -->
+                <div class="form-section">
+                    <h3 class="section-title">🏠 Address Information</h3>
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label for="presentAddress">Present Address <span class="required">*</span></label>
+                            <textarea id="presentAddress" name="presentAddress" placeholder="Enter your current address" required></textarea>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="permanentAddress">Permanent Address <span class="required">*</span></label>
+                            <textarea id="permanentAddress" name="permanentAddress" placeholder="Enter your permanent address" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="state">State <span class="required">*</span></label>
+                            <select id="state" name="state" required>
+                                <option value="">Select State</option>
+                                <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                                <option value="Assam">Assam</option>
+                                <option value="Bihar">Bihar</option>
+                                <option value="Chhattisgarh">Chhattisgarh</option>
+                                <option value="Goa">Goa</option>
+                                <option value="Gujarat">Gujarat</option>
+                                <option value="Haryana">Haryana</option>
+                                <option value="Himachal Pradesh">Himachal Pradesh</option>
+                                <option value="Jharkhand">Jharkhand</option>
+                                <option value="Karnataka">Karnataka</option>
+                                <option value="Kerala">Kerala</option>
+                                <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                <option value="Maharashtra">Maharashtra</option>
+                                <option value="Manipur">Manipur</option>
+                                <option value="Meghalaya">Meghalaya</option>
+                                <option value="Mizoram">Mizoram</option>
+                                <option value="Nagaland">Nagaland</option>
+                                <option value="Odisha">Odisha</option>
+                                <option value="Punjab">Punjab</option>
+                                <option value="Rajasthan">Rajasthan</option>
+                                <option value="Sikkim">Sikkim</option>
+                                <option value="Tamil Nadu">Tamil Nadu</option>
+                                <option value="Telangana">Telangana</option>
+                                <option value="Tripura">Tripura</option>
+                                <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                <option value="Uttarakhand">Uttarakhand</option>
+                                <option value="West Bengal">West Bengal</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="district">District <span class="required">*</span></label>
+                            <input type="text" id="district" name="district" placeholder="Enter district name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pincode">Pincode <span class="required">*</span></label>
+                            <input type="text" id="pincode" name="pincode" placeholder="6-digit pincode" maxlength="6" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Document Upload Section -->
+                <div class="form-section">
+                    <h3 class="section-title">📄 Document Upload</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="aadhaarCard">Aadhaar Card <span class="required">*</span></label>
+                            <div class="file-input-wrapper">
+                                <input type="file" id="aadhaarCard" name="aadhaarCard" class="file-input" accept=".jpg,.jpeg,.png,.pdf" required>
+                                <div class="file-input-display">
+                                    <span class="file-icon">📄</span>
+                                    <span class="file-text">Choose Aadhaar Card file</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="ror">Record of Rights (ROR) <span class="required">*</span></label>
+                            <div class="file-input-wrapper">
+                                <input type="file" id="ror" name="ror" class="file-input" accept=".jpg,.jpeg,.png,.pdf" required>
+                                <div class="file-input-display">
+                                    <span class="file-icon">📋</span>
+                                    <span class="file-text">Choose ROR file</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="bankPassbook">Bank Passbook <span class="required">*</span></label>
+                            <div class="file-input-wrapper">
+                                <input type="file" id="bankPassbook" name="bankPassbook" class="file-input" accept=".jpg,.jpeg,.png,.pdf" required>
+                                <div class="file-input-display">
+                                    <span class="file-icon">🏦</span>
+                                    <span class="file-text">Choose Bank Passbook file</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="profilePhoto">Profile Photo <span class="required">*</span></label>
+                            <div class="file-input-wrapper">
+                                <input type="file" id="profilePhoto" name="profilePhoto" class="file-input" accept=".jpg,.jpeg,.png" required>
+                                <div class="file-input-display">
+                                    <span class="file-icon">📷</span>
+                                    <span class="file-text">Choose Profile Photo</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    Register Farmer
+                </button>
+
+                <div class="loading" id="loading">
+                    <p>🔄 Registering your account, please wait...</p>
+                </div>
+            </form>
+
+            <div class="login-link">
+                <p>Already have an account? <a href="login.html">Login here</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Aadhaar number formatting
+        document.getElementById('aadhaar').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            let formattedValue = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+            if (formattedValue.length <= 14) {
+                e.target.value = formattedValue;
+            } else {
+                e.target.value = formattedValue.substring(0, 14);
+            }
+        });
+
+        // Mobile number validation
+        document.getElementById('mobile').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            e.target.value = value;
+        });
+
+        // Pincode validation
+        document.getElementById('pincode').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            e.target.value = value;
+        });
+
+        // File input handling
+        document.querySelectorAll('.file-input').forEach(input => {
+            input.addEventListener('change', function() {
+                const display = this.parentElement.querySelector('.file-input-display');
+                const text = display.querySelector('.file-text');
+                
+                if (this.files[0]) {
+                    text.textContent = this.files[0].name;
+                    text.classList.add('has-file');
+                    display.classList.add('has-file');
+                } else {
+                    text.textContent = `Choose ${this.name} file`;
+                    text.classList.remove('has-file');
+                    display.classList.remove('has-file');
+                }
+            });
+        });
+
+        // Form submission
+        document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const alertContainer = document.getElementById('alertContainer');
+            
+            // Clear previous alerts
+            alertContainer.innerHTML = '';
+            
+            // Validate form
+            if (!validateForm()) {
+                return;
+            }
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+            
+            try {
+                const formData = new FormData(this);
+                
+                const response = await fetch('http://localhost:5000/auth/register', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('success', result.message || 'Registration successful! You can now login.');
+                    this.reset();
+                    // Reset file displays
+                    document.querySelectorAll('.file-text').forEach(text => {
+                        text.classList.remove('has-file');
+                        text.parentElement.classList.remove('has-file');
+                    });
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                } else {
+                    showAlert('error', result.error || 'Registration failed. Please try again.');
+                }
+            } catch (error) {
+                showAlert('error', 'Network error. Please check your connection and try again.');
+                console.error('Registration error:', error);
+            } finally {
+                submitBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        });
+
+        function validateForm() {
+            const aadhaar = document.getElementById('aadhaar').value.replace(/\D/g, '');
+            const mobile = document.getElementById('mobile').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const pincode = document.getElementById('pincode').value;
+
+            if (aadhaar.length !== 12) {
+                showAlert('error', 'Aadhaar number must be 12 digits');
+                return false;
+            }
+
+            if (!/^[6-9]\d{9}$/.test(mobile)) {
+                showAlert('error', 'Mobile number must be 10 digits starting with 6-9');
+                return false;
+            }
+
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showAlert('error', 'Please enter a valid email address');
+                return false;
+            }
+
+            if (password.length < 6) {
+                showAlert('error', 'Password must be at least 6 characters long');
+                return false;
+            }
+
+            if (pincode.length !== 6) {
+                showAlert('error', 'Pincode must be 6 digits');
+                return false;
+            }
+
+            return true;
+        }
+
+        function showAlert(type, message) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            alertContainer.appendChild(alertDiv);
+            
+            // Auto-hide after 5 seconds for success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    alertDiv.remove();
+                }, 5000);
+            }
+        }
+
+        // Copy present address to permanent address
+        document.getElementById('presentAddress').addEventListener('blur', function() {
+            const permanentAddress = document.getElementById('permanentAddress');
+            if (!permanentAddress.value.trim()) {
+                if (confirm('Copy present address to permanent address?')) {
+                    permanentAddress.value = this.value;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
